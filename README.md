@@ -1,4 +1,5 @@
 # 141CProj
+```
 #below are some helpful examples about using the package 
 
 library(blblm)
@@ -30,3 +31,4 @@ l<-parr.blbglm(Survived~Class+Sex, binomial, df,1000, 4)
 coeff.blb(l)
 se.blb(l)
 confints.blb(l, level=0.9)
+```
