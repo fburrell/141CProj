@@ -20,3 +20,8 @@ Imports:
     magrittr,
     purrr,
     utils
+Suggests: 
+    testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

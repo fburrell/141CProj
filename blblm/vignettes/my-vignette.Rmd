@@ -1,0 +1,61 @@
+---
+title: "blblm vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{my-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(blblm)
+```
+
+This R package is designed to asssist with bootstrapping and linear regression as well as
+generalized linear models, by integrating the two in simple functions. It allows the user to 
+easily perform these calculations, without designing the functions themselves. Furthermore, 
+the user has the ability to use parallel computing to speed up the processing of the 
+bootstrap samples. Parallel computing can speed up the process by 4 times in this situation. 
+Additionally, the package contains functions that find the average cofficients of the variables
+as well as their standard errors. Confidence intervals and predictions can also be done with this 
+package. Examples of how to use the package are shown below. 
+
+
+```{r}
+#non parallel lm 
+l<-blblm(wt~mpg,mtcars, 1000)
+coeff.blb(l)
+se.blb(l)
+predicts.blb(l, data.frame(wt = c(2.5, 3), mpg=c(20,30)), confidence=TRUE)
+confints.blb(l, level=0.9)
+
+
+
+#parallel lm
+l<-parr.blblm(wt~mpg,mtcars,1000,4)
+coeff.blb(l)
+se.blb(l)
+predicts.blb(l, data.frame(wt = c(2.5, 3), mpg=c(20,30)), confidence=TRUE)
+confints.blb(l, level=0.9)
+
+#non parallel glm
+df<-data.frame(Titanic)
+l<-blbglm(Survived~Class+Sex, binomial, df,1000)
+coeff.blb(l)
+se.blb(l)
+confints.blb(l, level=0.9)
+
+
+#parallel glm
+l<-parr.blbglm(Survived~Class+Sex, binomial, df,1000, 4)
+coeff.blb(l)
+se.blb(l)
+confints.blb(l, level=0.9)
+```
