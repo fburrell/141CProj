@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(blblm)
+library(bench)
 ```
 
 This R package is designed to asssist with bootstrapping and linear regression as well as
@@ -27,35 +28,106 @@ Additionally, the package contains functions that find the average cofficients o
 as well as their standard errors. Confidence intervals and predictions can also be done with this 
 package. Examples of how to use the package are shown below. 
 
-
 ```{r}
 #non parallel lm 
+
+#blblm function was modified  using rsample package to improve speed.
 l<-blblm(wt~mpg,mtcars, 1000)
+
+
+#coeff and sigma functions were rewritten to accept slightly different format.
 coeff.blb(l)
 se.blb(l)
+
+
+#predict was modified and confint was rewritten to accept new format of bootstrap objects
 predicts.blb(l, data.frame(wt = c(2.5, 3), mpg=c(20,30)), confidence=TRUE)
 confints.blb(l, level=0.9)
+```
 
-
-
+```{r}
 #parallel lm
+
+#parallel function is much faster than the standard blblm function. It was done using parSapply.
 l<-parr.blblm(wt~mpg,mtcars,1000,4)
+
+#coeff ans sigma functions work the same with parr.blblm
 coeff.blb(l)
 se.blb(l)
+
+#predict and confint function work the same with parr.blblm
 predicts.blb(l, data.frame(wt = c(2.5, 3), mpg=c(20,30)), confidence=TRUE)
 confints.blb(l, level=0.9)
+```
 
+
+
+```{r}
 #non parallel glm
+
+#this function is very similar to blblm but modified for the glm interface
 df<-data.frame(Titanic)
 l<-blbglm(Survived~Class+Sex, binomial, df,1000)
+
+#coeff, se, predict functions interact the same
 coeff.blb(l)
 se.blb(l)
 confints.blb(l, level=0.9)
+```
 
 
+```{r}
 #parallel glm
+
+
+#Modified the parr.blblm function to accept GLM inputs
 l<-parr.blbglm(Survived~Class+Sex, binomial, df,1000, 4)
 coeff.blb(l)
 se.blb(l)
 confints.blb(l, level=0.9)
 ```
+
+
+
+```{r}
+#Our blblm function is about 8 seconds faster than the blblm from the base package
+result <- bench::mark(
+  l<-blblm(wt~mpg,mtcars, 10000),
+  relative = FALSE
+)
+result
+```
+
+```{r}
+#Our parallel function takes about 5 seconds for a bootstrap of 10000,
+#This makes it approximately 4 times faster than the blblm function given to us.
+result <- bench::mark(
+  l<-parr.blblm(wt~mpg,mtcars,10000,4),
+  relative = FALSE
+)
+result
+```
+
+```{r}
+#Normal blglm takes 15 seconds here for 1000 bootstraps
+
+df<-data.frame(Titanic)
+result <- bench::mark(
+  l<-blbglm(Survived~Class+Sex, binomial, df,1000),
+  relative = FALSE
+)
+result
+```
+
+```{r}
+#Parallel blglm takes 2 seconds here for 1000 bootstraps, and is faster with a bigger sample too 
+
+df<-data.frame(Titanic)
+result <- bench::mark(
+  l<-parr.blbglm(Survived~Class+Sex, binomial, df,1000, 4),
+  relative = FALSE
+)
+result
+```
+
+
